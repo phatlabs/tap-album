@@ -1,17 +1,27 @@
+// app/[cardCode]/page.tsx
+
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getAlbumByNfcCode } from "../data/albums";
 
-export default function CardPage({
-  params,
-}: {
-  params: { cardCode: string };
-}) {
-  const { cardCode } = params;
+// Props for this dynamic route: /[cardCode]
+type CardPageProps = {
+  params: {
+    cardCode: string;
+  };
+};
 
-  // Find album by NFC code
+export const metadata: Metadata = {
+  title: "Tap Album | Card",
+};
+
+export default function CardPage({ params }: CardPageProps) {
+  const rawCode = params.cardCode || "";
+  const cardCode = rawCode.toLowerCase();
+
   const album = getAlbumByNfcCode(cardCode);
 
-  // If no album, show error screen
+  // If NO album is attached to this NFC / QR code → show “Album Not Found”
   if (!album) {
     return (
       <main
@@ -21,31 +31,25 @@ export default function CardPage({
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          background: "radial-gradient(circle at top, #1f3bff 0, #020617 55%)",
-          color: "white",
           textAlign: "center",
+          background: "linear-gradient(135deg, #0014ff, #4000b3)",
+          color: "#ffffff",
           padding: "2rem",
         }}
       >
-        <h1
-          style={{
-            fontSize: "2.5rem",
-            fontWeight: 800,
-            marginBottom: "1rem",
-          }}
-        >
+        <h1 style={{ fontSize: "2.4rem", fontWeight: 800, marginBottom: "0.5rem" }}>
           Album Not Found
         </h1>
-        <p style={{ maxWidth: 480, opacity: 0.85, marginBottom: "0.5rem" }}>
+        <p style={{ marginBottom: "0.75rem", maxWidth: 480 }}>
           This NFC card / link is not attached to an album yet.
         </p>
-        <p style={{ fontSize: "0.9rem", opacity: 0.7 }}>
-          Code: <strong>{cardCode.toUpperCase()}</strong>
+        <p style={{ opacity: 0.8, fontSize: "0.9rem" }}>
+          Code: <code>{rawCode}</code>
         </p>
       </main>
     );
   }
 
-  // If album exists, redirect to /album/[albumId]
+  // If we DO have an album, send them straight to /album/[albumId]
   redirect(`/album/${album.id}`);
 }
