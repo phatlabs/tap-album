@@ -1,23 +1,17 @@
 // app/[cardCode]/page.tsx
 
-import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import type { Metadata } from "next";
 import { getAlbumByNfcCode } from "../data/albums";
-
-// Props for this dynamic route: /[cardCode]
-type CardPageProps = {
-  params: {
-    cardCode: string;
-  };
-};
 
 export const metadata: Metadata = {
   title: "Tap Album | Card",
 };
 
-export default function CardPage({ params }: CardPageProps) {
-  const rawCode = params.cardCode || "";
-  const cardCode = rawCode.toLowerCase();
+export default function CardPage({ params }: any) {
+  // raw value from the URL: /[cardCode]
+  const rawCode = params?.cardCode ?? "";
+  const cardCode = String(rawCode).toLowerCase();
 
   const album = getAlbumByNfcCode(cardCode);
 
@@ -37,7 +31,13 @@ export default function CardPage({ params }: CardPageProps) {
           padding: "2rem",
         }}
       >
-        <h1 style={{ fontSize: "2.4rem", fontWeight: 800, marginBottom: "0.5rem" }}>
+        <h1
+          style={{
+            fontSize: "2.4rem",
+            fontWeight: 800,
+            marginBottom: "0.5rem",
+          }}
+        >
           Album Not Found
         </h1>
         <p style={{ marginBottom: "0.75rem", maxWidth: 480 }}>
