@@ -1,6 +1,6 @@
 // app/data/albums.ts
 
-// --- Types ---
+// ---- Types ----
 export type SocialLinks = {
   instagram?: string;
   twitter?: string;
@@ -38,8 +38,8 @@ export type MerchItem = {
 };
 
 export type Album = {
-  id: string;          // /album/[albumId]
-  nfcCode?: string;    // /[cardCode]
+  id: string;          // used by /album/[albumId]
+  nfcCode?: string;    // used by /[cardCode]
   title: string;
   artist: string;
   year: string;
@@ -52,7 +52,7 @@ export type Album = {
   merch: MerchItem[];
 };
 
-// --- Data: your albums array ---
+// ---- Data ----
 
 export const albums: Album[] = [
   {
@@ -114,13 +114,21 @@ export const albums: Album[] = [
         city: "Los Angeles, CA",
         time: "8:00 PM",
         provider: "Ticketmaster",
-        url: "https://ticketmaster.com/your-show",
+        url: "https://ticketmaster.com/",
       },
     ],
 
     merch: [
       {
-        id: "vinyl",
+        id: "tee-1",
+        name: "Midnight Dreams Tee",
+        price: "$35",
+        emoji: "👕",
+        provider: "BigCartel",
+        url: "https://yourshop.bigcartel.com/product/midnight-dreams-tee",
+      },
+      {
+        id: "vinyl-1",
         name: "Vinyl Edition",
         price: "$45",
         emoji: "💿",
@@ -130,17 +138,19 @@ export const albums: Album[] = [
     ],
   },
 ];
- 
-// --- Lookup helpers ---
 
+// ---- Helper functions ----
+
+// Look up by albumId – /album/[albumId]
 export function getAlbumById(albumId: string): Album | undefined {
   return albums.find(
-    (album) => album.id.toLowerCase() === albumId.toLowerCase()
+    (album) => album.id.toLowerCase() === albumId.toLowerCase(),
   );
 }
 
+// Look up by NFC / card code – /[cardCode]
 export function getAlbumByNfcCode(cardCode: string): Album | undefined {
   return albums.find(
-    (album) => album.nfcCode?.toLowerCase() === cardCode.toLowerCase()
+    (album) => album.nfcCode?.toLowerCase() === cardCode.toLowerCase(),
   );
 }
