@@ -1,21 +1,21 @@
 // app/[cardCode]/page.tsx
 
-import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { getAlbumByNfcCode } from "../data/albums";
 
 export const metadata: Metadata = {
-  title: "Tap Album | Card",
+  title: "Tap Album | Card Debug",
 };
 
+// force Next 15 to treat this as dynamic
+export const dynamic = "force-dynamic";
+
 export default function CardPage({ params }: any) {
-  // raw value from the URL: /[cardCode]
   const rawCode = params?.cardCode ?? "";
   const cardCode = String(rawCode).toLowerCase();
 
   const album = getAlbumByNfcCode(cardCode);
 
-  // If NO album is attached to this NFC / QR code → show “Album Not Found”
   if (!album) {
     return (
       <main
@@ -31,25 +31,67 @@ export default function CardPage({ params }: any) {
           padding: "2rem",
         }}
       >
-        <h1
+        <h1 style={{ fontSize: "2.4rem", fontWeight: 800, marginBottom: 8 }}>
+          Debug: No album for this code
+        </h1>
+        <p style={{ marginBottom: 8 }}>Raw code from URL:</p>
+        <code
           style={{
-            fontSize: "2.4rem",
-            fontWeight: 800,
-            marginBottom: "0.5rem",
+            padding: "4px 8px",
+            background: "rgba(0,0,0,0.3)",
+            borderRadius: 4,
           }}
         >
-          Album Not Found
-        </h1>
-        <p style={{ marginBottom: "0.75rem", maxWidth: 480 }}>
-          This NFC card / link is not attached to an album yet.
-        </p>
-        <p style={{ opacity: 0.8, fontSize: "0.9rem" }}>
-          Code: <code>{rawCode}</code>
-        </p>
+          {rawCode}
+        </code>
       </main>
     );
   }
 
-  // If we DO have an album, send them straight to /album/[albumId]
-  redirect(`/album/${album.id}`);
+  return (
+    <main
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        textAlign: "center",
+        background: "radial-gradient(circle at top, #facc15, #0f172a)",
+        color: "#ffffff",
+        padding: "2rem",
+      }}
+    >
+      <h1 style={{ fontSize: "2.4rem", fontWeight: 800, marginBottom: 8 }}>
+        Debug: Card found
+      </h1>
+      <p style={{ marginBottom: 8 }}>cardCode from URL:</p>
+      <code
+        style={{
+          padding: "4px 8px",
+          background: "rgba(0,0,0,0.3)",
+          borderRadius: 4,
+          marginBottom: 16,
+          display: "inline-block",
+        }}
+      >
+        {rawCode}
+      </code>
+
+      <p style={{ marginBottom: 4 }}>Matched album:</p>
+      <pre
+        style={{
+          textAlign: "left",
+          maxWidth: 500,
+          fontSize: 12,
+          whiteSpace: "pre-wrap",
+          background: "rgba(15,23,42,0.9)",
+          padding: 12,
+          borderRadius: 8,
+        }}
+      >
+        {JSON.stringify(album, null, 2)}
+      </pre>
+    </main>
+  );
 }
