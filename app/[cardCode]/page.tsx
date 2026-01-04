@@ -1,97 +1,123 @@
 // app/[cardCode]/page.tsx
-
-import type { Metadata } from "next";
+import React from "react";
+import Link from "next/link";
 import { getAlbumByNfcCode } from "../data/albums";
 
-export const metadata: Metadata = {
-  title: "Tap Album | Card Debug",
-};
-
-// force Next 15 to treat this as dynamic
+// Keep this so the page is always rendered fresh
 export const dynamic = "force-dynamic";
 
 export default function CardPage({ params }: any) {
-  const rawCode = params?.cardCode ?? "";
-  const cardCode = String(rawCode).toLowerCase();
-
+  const cardCode = String(params?.cardCode || "").toLowerCase();
   const album = getAlbumByNfcCode(cardCode);
 
+  // If we didn't find an album for this card, show a friendly 404-style message
   if (!album) {
     return (
       <main
         style={{
           minHeight: "100vh",
           display: "flex",
-          flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          textAlign: "center",
-          background: "linear-gradient(135deg, #0014ff, #4000b3)",
-          color: "#ffffff",
-          padding: "2rem",
+          background: "#020617",
+          color: "white",
+          padding: "24px",
         }}
       >
-        <h1 style={{ fontSize: "2.4rem", fontWeight: 800, marginBottom: 8 }}>
-          Debug: No album for this code
-        </h1>
-        <p style={{ marginBottom: 8 }}>Raw code from URL:</p>
-        <code
-          style={{
-            padding: "4px 8px",
-            background: "rgba(0,0,0,0.3)",
-            borderRadius: 4,
-          }}
-        >
-          {rawCode}
-        </code>
+        <div style={{ maxWidth: 480, textAlign: "center" }}>
+          <h1 style={{ fontSize: 32, marginBottom: 8 }}>Card not found</h1>
+          <p style={{ marginBottom: 24 }}>
+            We couldn&apos;t find an album linked to the card code{" "}
+            <code>{cardCode}</code>.
+          </p>
+          <Link href="/" style={{ textDecoration: "underline" }}>
+            Back to Tap Album home
+          </Link>
+        </div>
       </main>
     );
   }
 
+  // If we DO have an album, show the album info
   return (
     <main
       style={{
         minHeight: "100vh",
         display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
         justifyContent: "center",
-        textAlign: "center",
-        background: "radial-gradient(circle at top, #facc15, #0f172a)",
-        color: "#ffffff",
-        padding: "2rem",
+        alignItems: "center",
+        background: "#020617",
+        color: "white",
+        padding: "40px 16px",
       }}
     >
-      <h1 style={{ fontSize: "2.4rem", fontWeight: 800, marginBottom: 8 }}>
-        Debug: Card found
-      </h1>
-      <p style={{ marginBottom: 8 }}>cardCode from URL:</p>
-      <code
-        style={{
-          padding: "4px 8px",
-          background: "rgba(0,0,0,0.3)",
-          borderRadius: 4,
-          marginBottom: 16,
-          display: "inline-block",
-        }}
-      >
-        {rawCode}
-      </code>
+      <div style={{ maxWidth: 720, width: "100%" }}>
+        <p
+          style={{
+            textTransform: "uppercase",
+            letterSpacing: "0.2em",
+            fontSize: 12,
+            marginBottom: 8,
+            opacity: 0.8,
+          }}
+        >
+          Tap Album • NFC Access
+        </p>
 
-      <p style={{ marginBottom: 4 }}>Matched album:</p>
-      <pre
-        style={{
-          textAlign: "left",
-          maxWidth: 500,
-          fontSize: 12,
-          whiteSpace: "pre-wrap",
-          background: "rgba(15,23,42,0.9)",
-          padding: 12,
-          borderRadius: 8,
-        }}
-      >
-        {JSON.stringify(album, null, 2)}
-      </pre>
+        <h1 style={{ fontSize: 32, marginBottom: 4 }}>{album.title}</h1>
+        <p style={{ opacity: 0.8, marginBottom: 24 }}>
+          {album.artist} • {album.year} • {album.trackCount} tracks
+        </p>
+
+        {/* Simple audio player for first track */}
+        {album.tracks[0] && (
+          <div style={{ marginBottom: 24 }}>
+            <p style={{ marginBottom: 8 }}>Preview: {album.tracks[0].title}</p>
+            <audio controls style={{ width: "100%" }}>
+              <source src={album.tracks[0].audioUrl} type="audio/mpeg" />
+            </audio>
+          </div>
+        )}
+
+        {/* Links */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 24 }}>
+          <strong>Connect with the artist</strong>
+          <Link href={album.social.instagram} target="_blank">
+            Instagram
+          </Link>
+          <Link href={album.social.youtube} target="_blank">
+            YouTube
+          </Link>
+          <Link href={album.social.bigcartel} target="_blank">
+            Shop / Merch
+          </Link>
+        </div>
+
+        <Link
+          href={`/album/${album.id}`}
+          style={{ textDecoration: "underline", fontSize: 14 }}
+        >
+          View full album page
+        </Link>
+      </div>
     </main>
   );
+}
+
+// Metadata for SEO / link previews
+export async function generateMetadata({ params }: any) {
+  const cardCode = String(params?.cardCode || "").toLowerCase();
+  const album = getAlbumByNfcCode(cardCode);
+
+  if (!album) {
+    return {
+      title: "Card not found – Tap Album",
+      description: "We couldn’t find an album linked to this NFC card.",
+    };
+  }
+
+  return {
+    title: `${album.title} – ${album.artist} | Tap Album`,
+    description: `Exclusive tap-only access to ${album.title} by ${album.artist}.`,
+  };
 }
